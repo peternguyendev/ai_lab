@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Fundamentals</title>
+<style>
+    :root {
+        --bg: #f7f9fc;
+        --card: #ffffff;
+        --title: #2f5d8a;
+        --title-bg: #eaf2f9;
+        --text: #243447;
+        --muted: #5f6f7f;
+        --border: #d7e1ea;
+        --accent: #2f5d8a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        line-height: 1.65;
+    }
+
+    .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 36px 22px 60px;
+    }
+
+    header, .toc, section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.04);
+    }
+
+    header {
+        padding: 30px;
+        margin-bottom: 24px;
+    }
+
+    h1 {
+        margin: 0 0 10px;
+        color: var(--title);
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        margin: 0;
+        color: var(--muted);
+    }
+
+    .toc {
+        padding: 24px 28px;
+        margin-bottom: 26px;
+    }
+
+    .toc h2,
+    section h2 {
+        margin-top: 0;
+        color: var(--title);
+        background: var(--title-bg);
+        border-left: 5px solid var(--accent);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 1.3rem;
+    }
+
+    .toc ol {
+        margin: 12px 0 0 20px;
+        padding: 0;
+    }
+
+    .toc li {
+        margin: 7px 0;
+    }
+
+    a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    section {
+        padding: 24px 28px;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        color: var(--title);
+        margin-top: 28px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 5px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 14px;
+    }
+
+    th, td {
+        border: 1px solid var(--border);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background: var(--title-bg);
+        color: var(--title);
+    }
+
+    .example {
+        background: #f3f7fb;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 14px 16px;
+        margin: 12px 0;
+    }
+
+    .key-point {
+        background: #eef5fb;
+        border-left: 5px solid var(--accent);
+        border-radius: 8px;
+        padding: 16px 18px;
+        margin-top: 16px;
+    }
+
+    footer {
+        text-align: center;
+        color: var(--muted);
+        padding-top: 12px;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+        .container { padding: 20px 12px 40px; }
+        header, .toc, section { padding: 20px; }
+        h1 { font-size: 1.6rem; }
+    }
+
+    .toc ol ol {
+        margin-top: 7px;
+        margin-bottom: 10px;
+        color: var(--muted);
+    }
+
+    .toc ol ol li {
+        margin: 4px 0;
+    }
+
+    .equation { background:#f8fbfe; border:1px solid var(--border); border-radius:9px; padding:14px 16px; margin:12px 0; overflow-x:auto; font-family:Georgia,"Times New Roman",serif; font-size:1.06rem; }
+    .flow { text-align:center; font-weight:600; background:#eef5fb; border-radius:8px; padding:12px 16px; margin:12px 0; }
+    .note { background:#fffdf4; border-left:5px solid #c69a2b; padding:14px 16px; border-radius:8px; margin:14px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+    <h1>ML Fundamentals</h1>
+    <p class="subtitle">Foundational notes on machine learning and deep learning.</p>
+</header>
+
+<nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#section1">Machine Learning vs Deep Learning</a></li>
+
+        <li>
+            <a href="#section2">CNN vs RNN vs Transformers</a>
+            <ol>
+                <li><a href="#section2-1">Quick Comparison</a></li>
+                <li><a href="#section2-2">CNN — Convolutional Neural Network</a></li>
+                <li><a href="#section2-3">RNN — Recurrent Neural Network</a></li>
+                <li><a href="#section2-4">Transformer</a></li>
+                <li><a href="#section2-5">The Key Difference</a></li>
+                <li><a href="#section2-6">Easy Analogy</a></li>
+                <li><a href="#section2-7">Relationship to Deep Learning</a></li>
+            </ol>
+        </li>
+<li><a href="#section3-2">Generator Probability</a></li>
+                <li><a href="#section3-3">RAG-Sequence</a></li>
+                <li><a href="#section3-4">RAG-Token</a></li>
+                <li><a href="#section3-5">Mathematical Comparison</a></li>
+                <li><a href="#section3-6">BART Generator</a></li>
+                <li><a href="#section3-7">Compact Summary</a></li>
+            </ol>
+        </li>
+
+        <li>
+            <a href="#section3">RAG Generation: RAG-Sequence vs RAG-Token</a>
+            <ol>
+                <li><a href="#rag1">First understand the notation</a></li>
+                <li><a href="#rag2">The generator probability</a></li>
+                <li><a href="#rag3">Probability of an entire output sequence</a></li>
+                <li><a href="#rag4">But RAG retrieves multiple passages</a></li>
+                <li><a href="#rag5">RAG-Sequence</a></li>
+                <li><a href="#rag6">Mathematical example of RAG-Sequence</a></li>
+                <li><a href="#rag7">What is being marginalized?</a></li>
+                <li><a href="#rag8">RAG-Token</a></li>
+                <li><a href="#rag9">RAG-Token chooses evidence at every token</a></li>
+                <li><a href="#rag10">Mathematical example of RAG-Token</a></li>
+                <li><a href="#rag11">Why RAG-Token can mix passages</a></li>
+                <li><a href="#rag12">Why the generator is called pθ</a></li>
+                <li><a href="#rag13">What goes into BART?</a></li>
+                <li><a href="#rag14">Putting retriever and generator together</a></li>
+                <li><a href="#rag15">The most important mathematical difference</a></li>
+                <li><a href="#rag16">One correction to the wording in your notes</a></li>
+                <li><a href="#rag17">Compact summary</a></li>
+                <li><a href="#rag18">RAG-Token vs RAG-Sequence Quick Comparison</a></li>
+            </ol>
+        </li>
+</ol>
+</nav>
+
+<section id="section1">
+    <h2>1. Machine Learning vs Deep Learning</h2>
+
+    <p>
+        <strong>Machine Learning (ML)</strong> and <strong>Deep Learning (DL)</strong> are related,
+        but deep learning is a <strong>subset of machine learning</strong>.
+    </p>
+
+    <h3>1.1 Comparison</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Machine Learning</th>
+                <th>Deep Learning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Definition</td><td>AI methods that learn patterns from data</td><td>ML methods based mainly on multi-layer neural networks</td></tr>
+            <tr><td>Data needs</td><td>Can work well with small to medium datasets</td><td>Usually benefits from very large datasets</td></tr>
+            <tr><td>Feature extraction</td><td>Often designed manually by humans</td><td>Often learned automatically by the network</td></tr>
+            <tr><td>Compute</td><td>Usually less demanding</td><td>Usually requires much more compute</td></tr>
+            <tr><td>Training time</td><td>Often faster</td><td>Often slower</td></tr>
+            <tr><td>Interpretability</td><td>Often easier to understand</td><td>Often harder to interpret</td></tr>
+            <tr><td>Best for</td><td>Structured or tabular data, forecasting, classification</td><td>Images, speech, video, language, and complex patterns</td></tr>
+            <tr><td>Examples</td><td>Linear regression, decision trees, SVM, random forests</td><td>CNNs, RNNs, Transformers</td></tr>
+        </tbody>
+    </table>
+
+    <h3>1.2 Simple Example</h3>
+    <p>Suppose you want a computer to recognize a <strong>cat in a picture</strong>.</p>
+
+    <div class="example">
+        <strong>Traditional Machine Learning:</strong><br>
+        A human might first define useful features such as ear shape, fur texture,
+        eye shape, and whiskers. Then an ML algorithm uses those features to classify the image.
+    </div>
+
+    <div class="example">
+        <strong>Deep Learning:</strong><br>
+        You can give the neural network many labeled images. The network learns useful
+        features by itself, progressing from simple patterns such as edges to more complex
+        patterns such as eyes, ears, and eventually whole objects.
+    </div>
+
+    <h3>1.3 Relationship</h3>
+    <div class="key-point">
+        <strong>Artificial Intelligence → Machine Learning → Deep Learning</strong>
+    </div>
+
+    <p>
+        Therefore, <strong>every deep-learning system is a machine-learning system,
+        but not every machine-learning system uses deep learning.</strong>
+    </p>
+
+    <h3>1.4 Rule of Thumb</h3>
+    <p>
+        Traditional machine learning is often very effective for
+        <strong>structured data</strong>, while deep learning becomes especially powerful for
+        <strong>complex unstructured data</strong> such as images, audio, and natural language.
+    </p>
+</section>
+
+
+<section id="section2">
+    <h2>2. CNN vs RNN vs Transformers</h2>
+
+    <p>
+        CNNs, RNNs, and Transformers are all types of <strong>neural-network architectures</strong>,
+        but they are designed to process information in different ways.
+    </p>
+
+    <h3 id="section2-1">2.1 Quick Comparison</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>CNN</th>
+                <th>RNN</th>
+                <th>Transformer</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Full name</td>
+                <td>Convolutional Neural Network</td>
+                <td>Recurrent Neural Network</td>
+                <td>Transformer</td>
+            </tr>
+            <tr>
+                <td>Main idea</td>
+                <td>Look for local patterns</td>
+                <td>Process data sequentially</td>
+                <td>Use attention to relate relevant parts</td>
+            </tr>
+            <tr>
+                <td>Traditionally best for</td>
+                <td>Images</td>
+                <td>Sequential and time-series data</td>
+                <td>Language, multimodal data, and long sequences</td>
+            </tr>
+            <tr>
+                <td>Processing</td>
+                <td>Local regions</td>
+                <td>One step after another</td>
+                <td>Many tokens can be processed in parallel during training</td>
+            </tr>
+            <tr>
+                <td>Memory of earlier input</td>
+                <td>Limited by receptive field and layers</td>
+                <td>Hidden state carries prior information</td>
+                <td>Attention accesses other tokens directly</td>
+            </tr>
+            <tr>
+                <td>Long-range relationships</td>
+                <td>Moderate</td>
+                <td>Often difficult</td>
+                <td>Strong</td>
+            </tr>
+            <tr>
+                <td>Parallel training</td>
+                <td>Strong</td>
+                <td>Limited</td>
+                <td>Strong</td>
+            </tr>
+            <tr>
+                <td>Examples</td>
+                <td>ResNet, U-Net</td>
+                <td>LSTM, GRU</td>
+                <td>BERT, GPT, Llama</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 id="section2-2">2.2 CNN — Convolutional Neural Network</h3>
+
+    <p>
+        A <strong>CNN</strong> is especially good at detecting <strong>local spatial patterns</strong>.
+    </p>
+
+    <p>
+        Imagine an image of a cat. A CNN does not initially understand “cat.”
+        Its early layers may detect:
+    </p>
+
+    <div class="key-point">
+        <strong>edges → curves → shapes → eyes/ears → face → cat</strong>
+    </div>
+
+    <p>
+        A small filter, called a <strong>kernel</strong>, moves across an image and calculates features.
+    </p>
+
+    <div class="example">
+        <strong>Simplified convolution:</strong><br>
+        y<sub>i,j</sub> = Σ<sub>m</sub> Σ<sub>n</sub>
+        X<sub>i+m,j+n</sub>K<sub>m,n</sub>
+    </div>
+
+    <p>
+        The filter may become sensitive to features such as vertical edges.
+    </p>
+
+    <div class="example">
+        <strong>Intuition:</strong> “Look at small neighborhoods and find useful patterns.”
+    </div>
+
+    <p>
+        CNNs are widely used for image classification, object detection, medical imaging,
+        and image segmentation.
+    </p>
+
+    <h3 id="section2-3">2.3 RNN — Recurrent Neural Network</h3>
+
+    <p>
+        An <strong>RNN</strong> was designed for <strong>sequences</strong>, such as:
+    </p>
+
+    <div class="key-point">
+        <strong>I → love → learning → AI</strong>
+    </div>
+
+    <p>
+        Instead of treating every word independently, an RNN maintains a
+        <strong>hidden state</strong> containing information from previous steps.
+    </p>
+
+    <div class="example">
+        <strong>Simplified equation:</strong><br>
+        h<sub>t</sub> = f(W<sub>x</sub>x<sub>t</sub> + W<sub>h</sub>h<sub>t-1</sub> + b)
+    </div>
+
+    <p>
+        where x<sub>t</sub> is the current input, h<sub>t-1</sub> is the previous memory,
+        h<sub>t</sub> is the new memory, and W<sub>x</sub> and W<sub>h</sub> are learned weights.
+    </p>
+
+    <p>
+        Information therefore flows sequentially:
+    </p>
+
+    <div class="key-point">
+        <strong>Word 1 → Word 2 → Word 3 → Word 4</strong>
+    </div>
+
+    <p>
+        Basic RNNs often struggle with long-distance relationships because information
+        must pass through many sequential steps. <strong>LSTM</strong> and <strong>GRU</strong>
+        networks were developed to improve this problem.
+    </p>
+
+    <div class="example">
+        <strong>Intuition:</strong> “Read one thing at a time and carry a memory forward.”
+    </div>
+
+    <h3 id="section2-4">2.4 Transformer</h3>
+
+    <p>
+        The <strong>Transformer</strong> introduced a major change. Instead of processing
+        words mainly one at a time, it uses <strong>attention</strong> so that each token
+        can directly examine other relevant tokens.
+    </p>
+
+    <div class="example">
+        <strong>Example:</strong><br>
+        “The animal didn't cross the street because it was tired.”<br><br>
+        To understand “it,” the model should connect it strongly with “animal.”
+    </div>
+
+    <p>
+        Attention allows the model to learn that relationship directly.
+    </p>
+
+    <div class="example">
+        <strong>Core attention calculation:</strong><br>
+        Attention(Q,K,V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>)V
+    </div>
+
+    <ul>
+        <li><strong>Q = Query:</strong> What am I looking for?</li>
+        <li><strong>K = Key:</strong> What information does each token contain?</li>
+        <li><strong>V = Value:</strong> What information should be passed forward?</li>
+    </ul>
+
+    <div class="key-point">
+        <strong>Input tokens → Query/Key/Value → Attention scores → Relevant relationships → Weighted information → Next layer</strong>
+    </div>
+
+    <p>
+        This architecture is the foundation of modern systems such as GPT, BERT, Llama,
+        and many multimodal models.
+    </p>
+
+    <div class="example">
+        <strong>Intuition:</strong> “Look at the whole relevant context and decide what deserves attention.”
+    </div>
+
+    <h3 id="section2-5">2.5 The Key Difference</h3>
+
+    <p>Consider the sentence:</p>
+
+    <div class="example">
+        “The dog that was playing with the children in the park was hungry.”
+    </div>
+
+    <p>
+        A <strong>CNN</strong> primarily examines nearby patterns.
+    </p>
+
+    <p>
+        An <strong>RNN</strong> processes the sentence sequentially:
+    </p>
+
+    <div class="key-point">
+        <strong>The → dog → that → was → playing → ... → hungry</strong>
+    </div>
+
+    <p>
+        Information about “dog” must survive through the sequence.
+    </p>
+
+    <p>
+        A <strong>Transformer</strong> can directly establish:
+    </p>
+
+    <div class="key-point">
+        <strong>dog ↔ hungry</strong>
+    </div>
+
+    <p>
+        through attention, even though the two words are separated. This ability is one
+        major reason Transformers became so successful for language.
+    </p>
+
+    <h3 id="section2-6">2.6 Easy Analogy</h3>
+
+    <p>Imagine three students trying to understand a long book:</p>
+
+    <div class="example">
+        <strong>CNN:</strong> Reads small groups of nearby words and looks for patterns.
+    </div>
+
+    <div class="example">
+        <strong>RNN:</strong> Reads the book from beginning to end while trying to remember what happened earlier.
+    </div>
+
+    <div class="example">
+        <strong>Transformer:</strong> Can look across the relevant text and ask,
+        “Which earlier parts are most important for understanding what I am reading now?”
+    </div>
+
+    <h3 id="section2-7">2.7 Relationship to Deep Learning</h3>
+
+    <p>
+        All three are <strong>deep-learning architectures</strong>:
+    </p>
+
+    <div class="key-point">
+        <strong>AI → Machine Learning → Deep Learning → CNN / RNN / Transformer</strong>
+    </div>
+
+    <p>
+        They are not three different levels of AI. They are different
+        <strong>architectural approaches within deep learning</strong>.
+    </p>
+
+    <p>
+        A particularly important historical progression for language applications is:
+    </p>
+
+    <div class="key-point">
+        <strong>RNN → LSTM/GRU → Transformer → modern LLMs</strong>
+    </div>
+
+    <p>
+        CNNs remain extremely useful, particularly in computer vision, even though
+        Transformers are now also heavily used for vision and multimodal AI.
+    </p>
+</section>
+
+<section id="section3">
+<h2>3. RAG Generation: RAG-Sequence vs RAG-Token</h2>
+
+<p>
+This is describing the <strong>original RAG formulation from Lewis et al. (2020)</strong>. The key idea is that RAG combines two probability models:
+</p>
+
+<div class="equation">
+<strong>Retriever</strong> p<sub>η</sub>(z|x)
+&nbsp;&nbsp;&nbsp; + &nbsp;&nbsp;&nbsp;
+<strong>Generator</strong> p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>1:i−1</sub>)
+</div>
+
+<p>
+The retriever decides <strong>which passages are useful</strong>, while the generator decides <strong>which output tokens should be produced given the query and a retrieved passage</strong>. Lewis et al. implemented the generator using a pretrained sequence-to-sequence model, BART-large, and proposed two ways to combine retrieved passages with generation: <strong>RAG-Sequence</strong> and <strong>RAG-Token</strong>.
+</p>
+
+<h3 id="rag1">3.1 First understand the notation</h3>
+
+<p>Suppose the user asks:</p>
+
+<div class="example">
+<strong>x:</strong> “Who wrote <em>The Old Man and the Sea</em>?”
+</div>
+
+<p>The retriever searches a document collection and returns passages such as:</p>
+
+<div class="equation">
+z<sub>1</sub>, z<sub>2</sub>, z<sub>3</sub>, …, z<sub>k</sub>
+</div>
+
+<p>For example:</p>
+
+<div class="example">
+z<sub>1</sub> = “The Old Man and the Sea is a novel by Ernest Hemingway.”<br><br>
+z<sub>2</sub> = “Hemingway received the Nobel Prize in Literature in 1954.”<br><br>
+z<sub>3</sub> = “The novel was published in 1952.”
+</div>
+
+<p>The desired answer might be:</p>
+
+<div class="equation">
+y = (y<sub>1</sub>, y<sub>2</sub>) = (Ernest, Hemingway)
+</div>
+
+<p>The symbols mean:</p>
+
+<table>
+<thead>
+<tr><th>Symbol</th><th>Meaning</th></tr>
+</thead>
+<tbody>
+<tr><td>x</td><td>input query</td></tr>
+<tr><td>z</td><td>retrieved passage/document</td></tr>
+<tr><td>y</td><td>complete generated answer</td></tr>
+<tr><td>y<sub>i</sub></td><td>token generated at position i</td></tr>
+<tr><td>y<sub>1:i−1</sub></td><td>all previously generated tokens</td></tr>
+<tr><td>p<sub>η</sub>(z|x)</td><td>retriever probability</td></tr>
+<tr><td>p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>1:i−1</sub>)</td><td>generator probability</td></tr>
+<tr><td>η</td><td>retriever parameters</td></tr>
+<tr><td>θ</td><td>generator parameters</td></tr>
+<tr><td>k</td><td>number of retrieved passages</td></tr>
+<tr><td>N</td><td>number of tokens in the output</td></tr>
+</tbody>
+</table>
+
+<h3 id="rag2">3.2 The generator probability</h3>
+
+<p>The expression</p>
+
+<div class="equation">
+<strong>p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>1:i−1</sub>)</strong>
+</div>
+
+<p>is extremely important.</p>
+
+<p>It says:</p>
+
+<div class="key-point">
+Given the <strong>query x</strong>, the <strong>retrieved passage z</strong>, and the tokens already generated y<sub>1</sub>,…,y<sub>i−1</sub>, what is the probability that the next token is y<sub>i</sub>?
+</div>
+
+<p>For example, suppose we have:</p>
+
+<div class="example">
+x = “Who wrote The Old Man and the Sea?”<br><br>
+z = “The Old Man and the Sea was written by Ernest Hemingway.”
+</div>
+
+<p>At the first output position, the model evaluates something like:</p>
+
+<div class="equation">
+p<sub>θ</sub>(y<sub>1</sub>|x,z)
+</div>
+
+<p>Maybe its vocabulary probabilities are:</p>
+
+<div class="equation">
+P(Ernest)=0.70<br>
+P(William)=0.05<br>
+P(The)=0.03
+</div>
+
+<p>and so on.</p>
+
+<p>Suppose it selects:</p>
+
+<div class="equation">
+y<sub>1</sub> = Ernest
+</div>
+
+<p>At the next step:</p>
+
+<div class="equation">
+p<sub>θ</sub>(y<sub>2</sub>|x,z,Ernest)
+</div>
+
+<p>might give:</p>
+
+<div class="equation">
+P(Hemingway)=0.90<br>
+P(Smith)=0.02<br>
+P(Johnson)=0.01
+</div>
+
+<p>Thus:</p>
+
+<div class="equation">
+y<sub>2</sub> = Hemingway
+</div>
+
+<p>The answer becomes:</p>
+
+<div class="equation">
+y = (Ernest, Hemingway)
+</div>
+
+<p>This is ordinary <strong>autoregressive generation</strong>.</p>
+
+<h3 id="rag3">3.3 Probability of an entire output sequence</h3>
+
+<p>
+Because each token depends on previous tokens, the probability of the complete sequence is obtained using the probability chain rule:
+</p>
+
+<div class="equation">
+<strong>
+p<sub>θ</sub>(y|x,z)
+=
+∏<sub>i=1</sub><sup>N</sup>
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>1:i−1</sub>)
+</strong>
+</div>
+
+<p>For our two-token answer:</p>
+
+<div class="equation">
+y = (Ernest, Hemingway)
+</div>
+
+<p>suppose:</p>
+
+<div class="equation">
+P(Ernest|x,z)=0.70<br>
+P(Hemingway|x,z,Ernest)=0.90
+</div>
+
+<p>Then:</p>
+
+<div class="equation">
+P(y|x,z) = 0.70 × 0.90
+</div>
+
+<p>so:</p>
+
+<div class="equation">
+<strong>P(y|x,z)=0.63</strong>
+</div>
+
+<p>The complete answer therefore receives probability <strong>0.63 under that particular passage</strong>.</p>
+
+<h3 id="rag4">3.4 But RAG retrieves multiple passages</h3>
+
+<p>RAG does not normally depend on only one passage.</p>
+
+<p>The retriever computes:</p>
+
+<div class="equation">
+p<sub>η</sub>(z|x)
+</div>
+
+<p>for possible documents.</p>
+
+<p>Suppose the top three retrieved passages have:</p>
+
+<div class="equation">
+p<sub>η</sub>(z<sub>1</sub>|x)=0.60<br>
+p<sub>η</sub>(z<sub>2</sub>|x)=0.30<br>
+p<sub>η</sub>(z<sub>3</sub>|x)=0.10
+</div>
+
+<p>These represent the retriever's belief about how relevant each passage is.</p>
+
+<p>Conceptually:</p>
+
+<div class="flow">
+x → z<sub>1</sub> (0.60)<br>
+x → z<sub>2</sub> (0.30)<br>
+x → z<sub>3</sub> (0.10)
+</div>
+
+<p>Now RAG must combine these retrieval probabilities with generator probabilities.</p>
+
+<p>That is where <strong>RAG-Sequence</strong> and <strong>RAG-Token</strong> differ.</p>
+
+<h3 id="rag5">3.5 RAG-Sequence</h3>
+
+<p>The RAG-Sequence equation is:</p>
+
+<div class="equation">
+<strong>
+p<sub>RAG-Sequence</sub>(y|x)
+≈
+Σ<sub>z∈top-k</sub>
+p<sub>η</sub>(z|x)
+∏<sub>i=1</sub><sup>N</sup>
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>1:i−1</sub>)
+</strong>
+</div>
+
+<p>There are two major operations:</p>
+
+<div class="equation">
+Σ<sub>z</sub>
+&nbsp;&nbsp;&nbsp; and &nbsp;&nbsp;&nbsp;
+∏<sub>i</sub>
+</div>
+
+<p>Notice their order:</p>
+
+<div class="key-point">
+<strong>Σ<sub>z</sub> [ ∏<sub>i</sub> ]</strong>
+</div>
+
+<p>That ordering captures the central idea of RAG-Sequence.</p>
+
+<h4>3.5.1 Intuition</h4>
+
+<p>For each passage z:</p>
+
+<ol>
+<li>Keep that same passage.</li>
+<li>Generate/evaluate the <strong>whole answer</strong> using it.</li>
+<li>Calculate the probability of that whole sequence.</li>
+<li>Weight the result by the passage's retrieval probability.</li>
+<li>Combine the possibilities across retrieved passages.</li>
+</ol>
+
+<p>
+Lewis et al. describe this formulation as using the <strong>same latent document for all target tokens</strong> in a generated sequence.
+</p>
+
+<p>Conceptually:</p>
+
+<div class="flow">
+z<sub>1</sub> → y<sub>1</sub>,y<sub>2</sub>,y<sub>3</sub>,…,y<sub>N</sub><br><br>
+or<br><br>
+z<sub>2</sub> → y<sub>1</sub>,y<sub>2</sub>,y<sub>3</sub>,…,y<sub>N</sub><br><br>
+or<br><br>
+z<sub>3</sub> → y<sub>1</sub>,y<sub>2</sub>,y<sub>3</sub>,…,y<sub>N</sub>
+</div>
+
+<p>Each possible answer sequence is evaluated under a particular passage.</p>
+
+<h3 id="rag6">3.6 Mathematical example of RAG-Sequence</h3>
+
+<p>Suppose we retrieve three passages:</p>
+
+<div class="equation">
+P(z<sub>1</sub>|x)=0.6<br>
+P(z<sub>2</sub>|x)=0.3<br>
+P(z<sub>3</sub>|x)=0.1
+</div>
+
+<p>We want to evaluate the two-token answer:</p>
+
+<div class="equation">
+y = (Ernest, Hemingway)
+</div>
+
+<p>Assume the generator probabilities are:</p>
+
+<table>
+<thead>
+<tr>
+<th>Passage</th>
+<th>P(Ernest)</th>
+<th>P(Hemingway | Ernest)</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>z<sub>1</sub></td><td>0.80</td><td>0.90</td></tr>
+<tr><td>z<sub>2</sub></td><td>0.50</td><td>0.60</td></tr>
+<tr><td>z<sub>3</sub></td><td>0.20</td><td>0.30</td></tr>
+</tbody>
+</table>
+
+<p>First calculate the sequence probability for each passage.</p>
+
+<p>For z<sub>1</sub>:</p>
+
+<div class="equation">
+P(y|x,z<sub>1</sub>) = 0.80 × 0.90 = 0.72
+</div>
+
+<p>For z<sub>2</sub>:</p>
+
+<div class="equation">
+P(y|x,z<sub>2</sub>) = 0.50 × 0.60 = 0.30
+</div>
+
+<p>For z<sub>3</sub>:</p>
+
+<div class="equation">
+P(y|x,z<sub>3</sub>) = 0.20 × 0.30 = 0.06
+</div>
+
+<p>Now multiply each by its retrieval probability:</p>
+
+<div class="equation">
+z<sub>1</sub>: 0.6 × 0.72 = 0.432<br>
+z<sub>2</sub>: 0.3 × 0.30 = 0.090<br>
+z<sub>3</sub>: 0.1 × 0.06 = 0.006
+</div>
+
+<p>Finally sum:</p>
+
+<div class="equation">
+P<sub>RAG-Seq</sub>(y|x)
+=
+0.432 + 0.090 + 0.006
+</div>
+
+<p>Therefore:</p>
+
+<div class="equation">
+<strong>P<sub>RAG-Seq</sub>(y|x)=0.528</strong>
+</div>
+
+<h3 id="rag7">3.7 What is being marginalized?</h3>
+
+<p>The summation:</p>
+
+<div class="equation">
+Σ<sub>z</sub>
+</div>
+
+<p>is an example of <strong>marginalization</strong>.</p>
+
+<p>
+The model does not know which passage is the single “true” passage responsible for the answer.
+</p>
+
+<p>So z is treated as a <strong>latent variable</strong>.</p>
+
+<p>Instead of saying:</p>
+
+<div class="equation">
+z = z<sub>1</sub>
+</div>
+
+<p>with certainty, the model considers several possibilities:</p>
+
+<div class="equation">
+P(y|x) = Σ<sub>z</sub> P(z|x)P(y|x,z)
+</div>
+
+<p>This is simply the law of total probability.</p>
+
+<p>The RAG equation expands:</p>
+
+<div class="equation">
+P(y|x,z)
+</div>
+
+<p>into its autoregressive token probabilities:</p>
+
+<div class="equation">
+P(y|x,z)
+=
+∏<sub>i</sub>
+P(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+</div>
+
+<p>giving:</p>
+
+<div class="equation">
+P(y|x)
+=
+Σ<sub>z</sub>
+P(z|x)
+∏<sub>i</sub>
+P(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+</div>
+
+<p>which is exactly the RAG-Sequence formulation.</p>
+
+<h3 id="rag8">3.8 RAG-Token</h3>
+
+<p>RAG-Token changes where the summation over documents occurs:</p>
+
+<div class="equation">
+<strong>
+p<sub>RAG-Token</sub>(y|x)
+≈
+∏<sub>i=1</sub><sup>N</sup>
+Σ<sub>z∈top-k</sub>
+p<sub>η</sub>(z|x)
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>1:i−1</sub>)
+</strong>
+</div>
+
+<p>Notice the order now:</p>
+
+<div class="key-point">
+<strong>∏<sub>i</sub> [ Σ<sub>z</sub> ]</strong>
+</div>
+
+<p>Compare that with RAG-Sequence:</p>
+
+<div class="key-point">
+<strong>Σ<sub>z</sub> [ ∏<sub>i</sub> ]</strong>
+</div>
+
+<p>This small-looking mathematical change has an important interpretation.</p>
+
+<h3 id="rag9">3.9 RAG-Token chooses evidence at every token</h3>
+
+<p>For every token y<sub>i</sub>, RAG-Token considers <strong>all retrieved passages again</strong>.</p>
+
+<p>For token 1:</p>
+
+<div class="equation">
+P(y<sub>1</sub>|x)
+=
+Σ<sub>z</sub>
+P(z|x)
+P(y<sub>1</sub>|x,z)
+</div>
+
+<p>Then token 2:</p>
+
+<div class="equation">
+P(y<sub>2</sub>|x,y<sub>1</sub>)
+=
+Σ<sub>z</sub>
+P(z|x)
+P(y<sub>2</sub>|x,z,y<sub>1</sub>)
+</div>
+
+<p>Then token 3:</p>
+
+<div class="equation">
+P(y<sub>3</sub>|x,y<sub>1</sub>,y<sub>2</sub>)
+=
+Σ<sub>z</sub>
+P(z|x)
+P(y<sub>3</sub>|x,z,y<sub>1</sub>,y<sub>2</sub>)
+</div>
+
+<p>and so forth.</p>
+
+<p>
+Therefore different passages can contribute strongly to different tokens. This is precisely the distinction Lewis et al. made between their two formulations: RAG-Token permits different retrieved passages to contribute at different output positions, whereas RAG-Sequence marginalizes a single passage across the entire sequence.
+</p>
+
+<h3 id="rag10">3.10 Mathematical example of RAG-Token</h3>
+
+<p>Use the same retrieval probabilities:</p>
+
+<div class="equation">
+P(z<sub>1</sub>|x)=0.6<br>
+P(z<sub>2</sub>|x)=0.3<br>
+P(z<sub>3</sub>|x)=0.1
+</div>
+
+<p>Again generate:</p>
+
+<div class="equation">
+y = (Ernest, Hemingway)
+</div>
+
+<p>For the first token, suppose:</p>
+
+<table>
+<thead>
+<tr><th>Passage</th><th>P(Ernest | x,z)</th></tr>
+</thead>
+<tbody>
+<tr><td>z<sub>1</sub></td><td>0.80</td></tr>
+<tr><td>z<sub>2</sub></td><td>0.50</td></tr>
+<tr><td>z<sub>3</sub></td><td>0.20</td></tr>
+</tbody>
+</table>
+
+<p>RAG-Token combines them:</p>
+
+<div class="equation">
+P(Ernest)
+=
+0.6(0.80)
++
+0.3(0.50)
++
+0.1(0.20)
+</div>
+
+<div class="equation">
+=0.48+0.15+0.02
+</div>
+
+<div class="equation">
+<strong>P(Ernest)=0.65</strong>
+</div>
+
+<p>Now for the second token suppose:</p>
+
+<table>
+<thead>
+<tr><th>Passage</th><th>P(Hemingway | Ernest)</th></tr>
+</thead>
+<tbody>
+<tr><td>z<sub>1</sub></td><td>0.90</td></tr>
+<tr><td>z<sub>2</sub></td><td>0.60</td></tr>
+<tr><td>z<sub>3</sub></td><td>0.30</td></tr>
+</tbody>
+</table>
+
+<p>Then:</p>
+
+<div class="equation">
+P(Hemingway)
+=
+0.6(0.90)
++
+0.3(0.60)
++
+0.1(0.30)
+</div>
+
+<div class="equation">
+=0.54+0.18+0.03
+</div>
+
+<div class="equation">
+=0.75
+</div>
+
+<p>The entire answer probability is:</p>
+
+<div class="equation">
+P(y|x)=0.65×0.75
+</div>
+
+<p>so:</p>
+
+<div class="equation">
+<strong>P<sub>RAG-Token</sub>(y|x)=0.4875</strong>
+</div>
+
+<p>Notice that this is <strong>not the same as RAG-Sequence's 0.528</strong>.</p>
+
+<p>That is because:</p>
+
+<div class="equation">
+Σ<sub>z</sub>∏<sub>i</sub>(·)
+≠
+∏<sub>i</sub>Σ<sub>z</sub>(·)
+</div>
+
+<p>in general.</p>
+
+<p>That difference is the mathematical heart of the two RAG models.</p>
+
+<h3 id="rag11">3.11 A better example showing why RAG-Token can mix passages</h3>
+
+<p>Suppose the question is:</p>
+
+<div class="example">
+“Where was Einstein born, and what year was he born?”
+</div>
+
+<p>Imagine two retrieved passages.</p>
+
+<h4>Passage z<sub>1</sub></h4>
+
+<div class="example">
+Albert Einstein was born in <strong>Ulm, Germany</strong>.
+</div>
+
+<h4>Passage z<sub>2</sub></h4>
+
+<div class="example">
+Albert Einstein was born on <strong>March 14, 1879</strong>.
+</div>
+
+<p>Suppose the desired answer is:</p>
+
+<div class="example">
+“Ulm in 1879.”
+</div>
+
+<p>For the token <strong>Ulm</strong>, passage z<sub>1</sub> might be very strong:</p>
+
+<div class="equation">
+P(Ulm|z<sub>1</sub>)=0.95
+</div>
+
+<p>but:</p>
+
+<div class="equation">
+P(Ulm|z<sub>2</sub>)=0.15
+</div>
+
+<p>For <strong>1879</strong>, however:</p>
+
+<div class="equation">
+P(1879|z<sub>1</sub>)=0.20
+</div>
+
+<p>and:</p>
+
+<div class="equation">
+P(1879|z<sub>2</sub>)=0.96
+</div>
+
+<p>RAG-Token naturally allows:</p>
+
+<div class="flow">
+z<sub>1</sub> → Ulm<br>
+z<sub>2</sub> → 1879
+</div>
+
+<p>Conceptually:</p>
+
+<div class="equation">
+<strong>
+z<sub>1</sub> → y<sub>1</sub>
+&nbsp;&nbsp;&nbsp;
+z<sub>2</sub> → y<sub>2</sub>
+</strong>
+</div>
+
+<p>
+RAG-Sequence instead scores the <strong>whole output under each passage</strong> before combining the passage-level sequence probabilities.
+</p>
+
+<h3 id="rag12">3.12 Why the generator is called p<sub>θ</sub></h3>
+
+<p>The subscript:</p>
+
+<div class="equation">
+θ
+</div>
+
+<p>represents the generator's learned parameters.</p>
+
+<p>In a Transformer such as BART, θ consists of enormous collections of learned values:</p>
+
+<div class="equation">
+θ = {W<sub>Q</sub>,W<sub>K</sub>,W<sub>V</sub>,W<sub>O</sub>,
+W<sub>FFN</sub>, embeddings, biases,…}
+</div>
+
+<p>These parameters determine the probability distribution:</p>
+
+<div class="equation">
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+</div>
+
+<p>
+In the original RAG experiments, the parametric generator was based on <strong>BART-large</strong>, while the retrieval side used a dense passage retrieval setup over Wikipedia. BART itself is a Transformer encoder-decoder pretrained as a denoising sequence-to-sequence model.
+</p>
+
+<h3 id="rag13">3.13 What goes into BART?</h3>
+
+<p>For each retrieved document, the generator receives something conceptually like:</p>
+
+<div class="equation">
+[query ; passage]
+</div>
+
+<p>For example:</p>
+
+<div class="example">
+<strong>Who wrote The Old Man and the Sea?</strong><br>
+<strong>The Old Man and the Sea is a 1952 novel written by Ernest Hemingway...</strong>
+</div>
+
+<p>The BART encoder transforms this input into contextual representations:</p>
+
+<div class="equation">
+H = Encoder<sub>θ</sub>(x,z)
+</div>
+
+<p>The decoder then autoregressively produces:</p>
+
+<div class="equation">
+y<sub>1</sub>,y<sub>2</sub>,…,y<sub>N</sub>
+</div>
+
+<p>At step i:</p>
+
+<div class="equation">
+h<sub>i</sub><sup>decoder</sup>
+=
+Decoder<sub>θ</sub>(y<sub>&lt;i</sub>,H)
+</div>
+
+<p>The decoder's hidden vector is projected to vocabulary logits:</p>
+
+<div class="equation">
+ℓ<sub>i</sub> = W<sub>o</sub>h<sub>i</sub> + b
+</div>
+
+<p>Then softmax converts those logits into probabilities:</p>
+
+<div class="equation">
+P(y<sub>i</sub>=v)
+=
+e<sup>ℓ<sub>i,v</sub></sup>
+/
+Σ<sub>u∈V</sub>e<sup>ℓ<sub>i,u</sub></sup>
+</div>
+
+<p>where V is the vocabulary.</p>
+
+<p>That probability is precisely the quantity represented abstractly by:</p>
+
+<div class="equation">
+<strong>p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)</strong>
+</div>
+
+<h3 id="rag14">3.14 Putting retriever and generator together</h3>
+
+<p>The overall system can therefore be viewed as:</p>
+
+<div class="flow">
+x<br>
+↓<br>
+<strong>Retriever</strong><br>
+p<sub>η</sub>(z|x)<br>
+↓<br>
+z<sub>1</sub>,z<sub>2</sub>,…,z<sub>k</sub><br>
+↓<br>
+<strong>Generator</strong><br>
+For every passage:<br>
+[x;z<sub>j</sub>] → BART Encoder → BART Decoder<br>
+↓<br>
+p<sub>θ</sub>(y<sub>i</sub>|x,z<sub>j</sub>,y<sub>&lt;i</sub>)
+</div>
+
+<p>Then RAG combines the probabilities using either:</p>
+
+<h4>RAG-Sequence</h4>
+
+<div class="equation">
+<strong>
+Σ<sub>z</sub>
+p<sub>η</sub>(z|x)
+∏<sub>i</sub>
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+</strong>
+</div>
+
+<p>or:</p>
+
+<h4>RAG-Token</h4>
+
+<div class="equation">
+<strong>
+∏<sub>i</sub>
+Σ<sub>z</sub>
+p<sub>η</sub>(z|x)
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+</strong>
+</div>
+
+<h3 id="rag15">3.15 The most important mathematical difference</h3>
+
+<p>Put the two next to each other:</p>
+
+<h4>RAG-Sequence</h4>
+
+<div class="equation">
+<strong>
+Σ<sub>z</sub>
+[
+p<sub>η</sub>(z|x)
+∏<sub>i</sub>
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+]
+</strong><br><br>
+one passage explains the entire sequence
+</div>
+
+<h4>RAG-Token</h4>
+
+<div class="equation">
+<strong>
+∏<sub>i</sub>
+[
+Σ<sub>z</sub>
+p<sub>η</sub>(z|x)
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+]
+</strong><br><br>
+passages are mixed for each token
+</div>
+
+<p>So an intuitive memory trick is:</p>
+
+<div class="key-point">
+<strong>RAG-Sequence:</strong> choose/marginalize evidence at the <strong>answer level</strong>.<br><br>
+<strong>RAG-Token:</strong> choose/marginalize evidence at the <strong>token level</strong>.
+</div>
+
+<h3 id="rag16">3.16 One correction to the wording in your notes</h3>
+
+<p>This sentence:</p>
+
+<div class="example">
+“RAG-Token ... ranks individually generated tokens rather than the entire sequence”
+</div>
+
+<p>is useful intuitively, but it is not mathematically the most precise description.</p>
+
+<p>
+More precisely, RAG-Token <strong>marginalizes over the retrieved documents separately for each output token</strong>:
+</p>
+
+<div class="equation">
+Σ<sub>z</sub>
+p<sub>η</sub>(z|x)
+p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)
+</div>
+
+<p>It is not simply ranking tokens independently. The token is still conditioned on:</p>
+
+<div class="equation">
+y<sub>1:i−1</sub>
+</div>
+
+<p>so generation remains <strong>autoregressive</strong>.</p>
+
+<p>
+Likewise, RAG-Sequence does not merely create k answers and pick the highest one in the mathematical definition. Its probability model <strong>marginalizes over the retrieved documents</strong>, although decoding procedures can approximate the search over candidate sequences. The original paper discusses distinct decoding strategies for RAG-Sequence.
+</p>
+
+<h3 id="rag17">3.17 Compact summary</h3>
+
+<p>The entire concept can be reduced to:</p>
+
+<div class="key-point">
+<strong>RAG = Retrieval probability × Generation probability</strong>
+</div>
+
+<p>The retriever provides:</p>
+
+<div class="equation">
+<strong>p<sub>η</sub>(z|x)</strong>
+</div>
+
+<p>“How relevant is passage z to query x?”</p>
+
+<p>The generator provides:</p>
+
+<div class="equation">
+<strong>p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)</strong>
+</div>
+
+<p>“Given the query, this passage, and what I have written so far, how likely is the next token?”</p>
+
+<p>Then:</p>
+
+<div class="equation">
+<strong>
+RAG-Sequence
+=
+Σ<sub>z</sub>
+[
+passage probability × whole-answer probability
+]
+</strong>
+</div>
+
+<p>whereas:</p>
+
+<div class="equation">
+<strong>
+RAG-Token
+=
+∏<sub>i</sub>
+[
+Σ<sub>z</sub>
+passage probability × next-token probability
+]
+</strong>
+</div>
+
+<p>The most important distinction is therefore:</p>
+
+<div class="key-point">
+<strong>
+RAG-Sequence: Σ<sub>z</sub>∏<sub>i</sub>
+&nbsp;&nbsp;&nbsp; vs. &nbsp;&nbsp;&nbsp;
+RAG-Token: ∏<sub>i</sub>Σ<sub>z</sub>
+</strong>
+</div>
+
+<p>
+That reversal of <strong>sum and product</strong> is what allows RAG-Token to combine evidence from different passages during different token-generation steps, while RAG-Sequence treats the retrieved passage as a sequence-level latent variable.
+</p>
+
+
+
+<h3 id="rag18">3.18 RAG-Token vs RAG-Sequence Quick Comparison</h3>
+
+<p>
+<strong>RAG-Sequence</strong> and <strong>RAG-Token</strong> differ in
+<strong>when they combine information from retrieved passages</strong>.
+</p>
+
+<table>
+<thead>
+<tr>
+    <th>Feature</th>
+    <th>RAG-Sequence</th>
+    <th>RAG-Token</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>Passage choice</td>
+    <td>One passage is treated as supporting the whole output sequence</td>
+    <td>Different passages can influence different output tokens</td>
+</tr>
+<tr>
+    <td>Mathematical form</td>
+    <td>Σ<sub>z</sub> p<sub>η</sub>(z|x) ∏<sub>i</sub> p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)</td>
+    <td>∏<sub>i</sub> Σ<sub>z</sub> p<sub>η</sub>(z|x) p<sub>θ</sub>(y<sub>i</sub>|x,z,y<sub>&lt;i</sub>)</td>
+</tr>
+<tr>
+    <td>Main idea</td>
+    <td>Combine passage evidence after scoring the whole answer</td>
+    <td>Combine passage evidence at every token-generation step</td>
+</tr>
+<tr>
+    <td>Evidence mixing</td>
+    <td>Sequence level</td>
+    <td>Token level</td>
+</tr>
+<tr>
+    <td>Flexibility</td>
+    <td>Lower</td>
+    <td>Higher</td>
+</tr>
+<tr>
+    <td>Intuition</td>
+    <td>“Which passage best explains this whole answer?”</td>
+    <td>“Which passage is most helpful for this next token?”</td>
+</tr>
+</tbody>
+</table>
+
+<p>The easiest way to remember the difference is:</p>
+
+<div class="equation">
+<strong>RAG-Sequence: Σ<sub>z</sub> ∏<sub>i</sub></strong>
+</div>
+
+<p>versus</p>
+
+<div class="equation">
+<strong>RAG-Token: ∏<sub>i</sub> Σ<sub>z</sub></strong>
+</div>
+
+<p>For example, suppose the question is:</p>
+
+<div class="example">
+“Where was Einstein born, and in what year?”
+</div>
+
+<p>
+One retrieved passage says <strong>Ulm, Germany</strong>, while another says
+<strong>1879</strong>.
+</p>
+
+<p>
+With <strong>RAG-Sequence</strong>, the model evaluates the whole answer under each
+retrieved passage and then combines those sequence-level probabilities.
+</p>
+
+<p>
+With <strong>RAG-Token</strong>, the token <strong>“Ulm”</strong> may be influenced
+mostly by the first passage, while <strong>“1879”</strong> may be influenced mostly
+by the second passage.
+</p>
+
+<div class="key-point">
+<strong>RAG-Sequence</strong> = one passage acts as the latent evidence for the entire answer.<br><br>
+<strong>RAG-Token</strong> = passage evidence is mixed again at each token position.
+</div>
+
+</section>
+
+<footer>ML Fundamentals Learning Notes</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 3.1 Summary: Domain-Specific GPT with RAG and Open-Source LLMs</title>
+<style>
+  :root { --accent: #1f5fae; --text: #24292f; --muted: #57606a; --border: #d8dee4; --bg: #ffffff; --panel: #f6f8fa; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px 64px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; color: var(--accent); }
+  .subtitle { color: var(--muted); margin: 0 0 28px; }
+  h2 { color: var(--accent); font-size: 1.4rem; border-bottom: 2px solid var(--accent); padding-bottom: 4px; margin-top: 44px; }
+  h3 { color: var(--accent); font-size: 1.1rem; margin-top: 24px; }
+  nav { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px 24px; }
+  nav h2 { border: 0; margin: 4px 0; font-size: 1.1rem; }
+  nav ol { margin: 6px 0; padding-left: 22px; }
+  nav a { color: var(--accent); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+  code { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: .9em; }
+  pre { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; overflow-x: auto; }
+  pre code { border: 0; padding: 0; }
+  .note { background: #fff8e5; border-left: 4px solid #d4a017; padding: 8px 14px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Lab 3.1 Summary</h1>
+<p class="subtitle">Domain-Specific GPT with RAG and Open-Source LLMs &mdash; reviewed from <code>domain_specific_gpt_with_rag_and_open_source_llms_solution.ipynb</code></p>
+
+<nav>
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#rag">Background: Retrieval-Augmented Generation</a></li>
+    <li><a href="#dpr">Part 1: Dense Passage Retrieval (Q1 &amp; Q2)</a></li>
+    <li><a href="#rag-seq-tok">Part 2: RAG-Sequence vs RAG-Token (Q3 &amp; Q4)</a></li>
+    <li><a href="#memory">Part 3: Memory and Long-Term Context (Q5)</a></li>
+    <li><a href="#review">Review Notes and Issues Found</a></li>
+    <li><a href="#walkthrough">Notebook Walkthrough</a></li>
+    <li><a href="#takeaways">Key Takeaways</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</nav>
+
+<h2 id="overview">1. Overview</h2>
+<p>The lab studies Retrieval-Augmented Generation (RAG) and long-term memory for LLMs. The solution notebook has five questions, a mix of written and programming, covering:</p>
+<table>
+  <tr><th>Question</th><th>Type</th><th>Topic</th></tr>
+  <tr><td>Q1</td><td>Written</td><td>Dense Passage Retrieval (DPR) concepts</td></tr>
+  <tr><td>Q2</td><td>Programming</td><td>Simplified DPR: preprocessing, chunking, encoding, indexing, retrieval</td></tr>
+  <tr><td>Q3</td><td>Written</td><td>RAG-Sequence vs RAG-Token</td></tr>
+  <tr><td>Q4</td><td>Programming</td><td>Log-space probability computation for both models</td></tr>
+  <tr><td>Q5</td><td>Written</td><td>Long context vs RAG; MemGPT</td></tr>
+</table>
+<p>The starter notebook has the same structure, with the Q2 and Q4 code cells left as stubs for students to complete. Dependencies are <code>numpy</code>, <code>torch</code> and <code>sentence-transformers</code>.</p>
+
+<h2 id="rag">2. Background: Retrieval-Augmented Generation</h2>
+<p>RAG combines <strong>parametric memory</strong> (knowledge in the pretrained model) with <strong>non-parametric memory</strong> (an external passage store), so the model can use retrieved data without extra pretraining.</p>
+<ul>
+  <li><strong>Retriever:</strong> a Dense Passage Retriever that indexes passages in a low-dimensional continuous space.</li>
+  <li><strong>Generator:</strong> a pretrained seq2seq transformer (originally BART-large) that conditions on the query <em>x</em> concatenated with the retrieved passage <em>z</em>.</li>
+  <li><strong>Inference:</strong> Maximum Inner Product Search finds the top-K passages. The passage is a latent variable, and predictions are marginalized over it.</li>
+</ul>
+
+<h2 id="dpr">3. Part 1: Dense Passage Retrieval (Q1 &amp; Q2)</h2>
+<h3>3.1 Concepts (Q1)</h3>
+<ul>
+  <li>Two separate encoders (BERT-style) produce query embeddings <em>q</em> and passage embeddings <em>p</em> from the <code>[CLS]</code> token.</li>
+  <li>Queries are not chunked and end with <code>[SEP]</code>: <code>What is machine learning? [SEP]</code>.</li>
+  <li>Passages are 100-word chunks with the title prepended: <code>Title [SEP] text</code>.</li>
+  <li>Similarity is a dot product: sim(q, p) = E<sub>Q</sub>(q)<sup>T</sup> &middot; E<sub>P</sub>(p).</li>
+</ul>
+<h3>3.2 Implementation (Q2)</h3>
+<table>
+  <tr><th>Component</th><th>Behaviour</th></tr>
+  <tr><td><code>preprocess_query</code></td><td>Returns <code>"{query} [SEP]"</code></td></tr>
+  <tr><td><code>preprocess_passage</code></td><td>Returns <code>"{title} [SEP] {text}"</code></td></tr>
+  <tr><td><code>chunk_document</code></td><td>Splits on whitespace into 100-word chunks, keeping the title on each chunk</td></tr>
+  <tr><td><code>SimpleDPR.encode</code></td><td>Uses <code>SentenceTransformer("all-MiniLM-L6-v2")</code> on CPU</td></tr>
+  <tr><td><code>SimpleDPR.index_passages</code></td><td>Preprocesses and encodes all passages, then stores the embeddings</td></tr>
+  <tr><td><code>SimpleDPR.retrieve</code></td><td>Encodes the query, takes dot products, sorts descending and returns the top-k. Raises <code>ValueError</code> if nothing is indexed.</td></tr>
+</table>
+<h3>3.3 Results</h3>
+<p>Five AI-topic passages were indexed. Top results per query:</p>
+<table>
+  <tr><th>Query</th><th>Top hit (score)</th><th>Runners-up</th></tr>
+  <tr><td>What is machine learning?</td><td>Machine Learning (0.8669)</td><td>Computer Vision (0.5778), Reinforcement Learning (0.5473)</td></tr>
+  <tr><td>How do neural networks work?</td><td>Deep Learning (0.6315)</td><td>Computer Vision (0.4629), Machine Learning (0.3853)</td></tr>
+  <tr><td>What is NLP used for?</td><td>Natural Language Processing (0.5329)</td><td>Machine Learning (0.1957), Deep Learning (0.1885)</td></tr>
+</table>
+<p>The top hit is the topically correct passage for all three queries.</p>
+
+<h2 id="rag-seq-tok">4. Part 2: RAG-Sequence vs RAG-Token (Q3 &amp; Q4)</h2>
+<h3>4.1 Concepts (Q3)</h3>
+<table>
+  <tr><th></th><th>RAG-Sequence</th><th>RAG-Token</th></tr>
+  <tr><td>Formula</td><td>&Sigma;<sub>z</sub> p(z|x) &prod;<sub>i</sub> p(y<sub>i</sub>|x,z,y<sub>1:i-1</sub>)</td><td>&prod;<sub>i</sub> &Sigma;<sub>z</sub> p(z|x) p(y<sub>i</sub>|x,z,y<sub>1:i-1</sub>)</td></tr>
+  <tr><td>Marginalization</td><td>Sum over passages outside the product over tokens</td><td>Sum over passages inside the product</td></tr>
+  <tr><td>Passage use</td><td>One passage supports the whole output sequence</td><td>Different passages can influence different tokens</td></tr>
+</table>
+<p>Per Lewis et al., RAG-Token did better on open-domain QA, because those questions often need facts from several passages. RAG overall gave more specific and accurate outputs than the parametric-only seq2seq models of the time.</p>
+<h3>4.2 Implementation (Q4)</h3>
+<ul>
+  <li><code>log_sum_exp</code> is the numerically stable helper: max + log &Sigma; exp(x &minus; max).</li>
+  <li>RAG-Sequence: sum token log-probs per passage, add the passage log-prob, then apply log-sum-exp across passages.</li>
+  <li>RAG-Token: at each token position, apply log-sum-exp across passages of (passage log-prob + token log-prob), then sum over positions.</li>
+</ul>
+<h3>4.3 Results</h3>
+<p>Both demos use 3 passages with retrieval probabilities [0.5, 0.3, 0.2].</p>
+<table>
+  <tr><th>Model</th><th>Log-prob</th><th>Probability</th></tr>
+  <tr><td>RAG-Sequence</td><td>&minus;2.0667</td><td>0.126600</td></tr>
+  <tr><td>RAG-Token</td><td>&minus;2.5526</td><td>0.077879</td></tr>
+</table>
+<p>I recomputed both by hand and they match: 0.084 + 0.0378 + 0.0048 = 0.1266 for RAG-Sequence, and 0.57 &times; 0.47 &times; 0.57 &times; 0.51 &asymp; 0.0779 for RAG-Token.</p>
+
+<h2 id="memory">5. Part 3: Memory and Long-Term Context (Q5)</h2>
+<p>The context window is a fundamental bottleneck for persistent memory and large knowledge bases, even with windows growing from 4K to over 1M tokens. Two strategies address it:</p>
+<table>
+  <tr><th>Strategy</th><th>Idea</th><th>Trade-off</th></tr>
+  <tr><td>Long Context (LC)</td><td>Extend the window so more tokens fit directly</td><td>Attention cost grows O(n&sup2;)</td></tr>
+  <tr><td>RAG</td><td>Retrieve only relevant information from external storage</td><td>Depends on retrieval quality</td></tr>
+</table>
+<p><strong>MemGPT</strong> borrows from operating systems. The context window is "main memory" (RAM) and external storage is "disk". The LLM pages information in and out through function calls, like virtual memory.</p>
+
+<h2 id="review">6. Review Notes and Issues Found</h2>
+<div class="note">
+<ol>
+  <li><strong>Swapped explanation in the RAG-Token demo.</strong> The closing printout says "RAG-Sequence allows different passages to influence different tokens" and "RAG-Token commits to a single passage". That is backwards, because RAG-Token is the one that mixes passages per token. The code is correct; only the printed text is wrong.</li>
+  <li><strong>The two demos are not comparable.</strong> The RAG-Token cell says it uses "the same example data", but it uses different token probabilities from the RAG-Sequence cell. So &minus;2.5526 vs &minus;2.0667 says nothing about which model is better. The sequence and token probabilities should be computed on one matrix.</li>
+  <li><strong><code>SimpleDPR</code> departs from real DPR.</strong> It uses one shared sentence-transformer (<code>all-MiniLM-L6-v2</code>) instead of two encoders. The docstring says embeddings come from <code>[CLS]</code>, but this model mean-pools. The scores look like cosine similarity (normalized embeddings) rather than raw dot products. It also appends the literal text "[SEP]", which this model does not treat as a special token.</li>
+  <li><strong><code>chunk_document</code> is not exercised.</strong> No cell calls it, so it is untested in the notebook.</li>
+  <li><strong>Q5 has no code.</strong> The notebook has duplicate Q5 / "Part 3" markdown, and the &ldquo;Question 1&rdquo; text largely repeats the Part 1 background. The numbering is inconsistent: Parts 1 and 3 exist but there is no Part 2, and the questions are labelled Q1&ndash;Q5.</li>
+  <li><strong>The summary mentions points the notebook never covers.</strong> It cites the advantages of dense over sparse retrieval and the O(n&sup2;) cost of attention, and neither is discussed earlier.</li>
+</ol>
+</div>
+
+<h2 id="walkthrough">7. Notebook Walkthrough</h2>
+<p>The notebook has 24 cells (14 markdown, 10 code). Of the code cells, 6 are implementations and demos for Q2 and Q4, and the other 4 are imports and helpers. In order:</p>
+<table>
+  <tr><th>Cells</th><th>Section</th><th>Content and assessment</th></tr>
+  <tr><td>0&ndash;3</td><td>Intro and setup</td><td>Lists four learning goals and imports <code>numpy</code>, <code>torch</code>, typing and <code>warnings</code>. <code>torch</code> is imported but never used directly.</td></tr>
+  <tr><td>4&ndash;6</td><td>RAG and DPR theory</td><td>Clear and accurate. Q1 restates the Part 1 background almost verbatim, so it adds little as a question.</td></tr>
+  <tr><td>7&ndash;9</td><td>Q2 code</td><td>Preprocessing helpers, chunking and <code>SimpleDPR</code>. Clean, typed and documented. Works as a retrieval demo, with the caveats in section 6.</td></tr>
+  <tr><td>10</td><td>Q2 demo</td><td>Three queries over five passages, all ranked sensibly. The model-load report is left in the output; it is harmless noise.</td></tr>
+  <tr><td>11&ndash;12</td><td>Q3 and Q4 intro</td><td>Gives both formulas and the key insight that the sum over passages is outside the product for RAG-Sequence and inside it for RAG-Token.</td></tr>
+  <tr><td>13&ndash;16</td><td>RAG-Sequence code</td><td>Log-space implementation with <code>log_sum_exp</code>. Correct, and the output verified by hand.</td></tr>
+  <tr><td>17&ndash;19</td><td>RAG-Token code</td><td>Correct implementation. The demo's closing text is wrong and its data differs from the sequence demo.</td></tr>
+  <tr><td>20&ndash;21</td><td>Q5 and Part 3</td><td>The same long-context vs RAG and MemGPT content appears twice. There is no code and no worked example.</td></tr>
+  <tr><td>22&ndash;23</td><td>Summary and references</td><td>Good recap and six well-known references. The summary covers the O(n&sup2;) cost and sparse-vs-dense advantages, which the notebook never explained.</td></tr>
+</table>
+<h3>7.1 Overall assessment</h3>
+<ul>
+  <li><strong>Strengths:</strong> correct maths, numerically stable log-space code, thorough docstrings and readable structure.</li>
+  <li><strong>Weaknesses:</strong> the swapped explanation, non-comparable demos, the simplified retriever that departs from DPR, duplicated markdown and a code-free memory section.</li>
+  <li><strong>Suggested fixes:</strong> correct the closing printout, run both RAG models on the same matrix, call <code>chunk_document</code> in a demo, and merge the duplicate Q5 and Part 3 sections.</li>
+</ul>
+
+<h2 id="takeaways">8. Key Takeaways</h2>
+<ul>
+  <li>RAG gives LLMs access to external knowledge without retraining.</li>
+  <li>Dense retrieval matches on meaning rather than keywords, as the NLP and neural-network queries show.</li>
+  <li>RAG-Sequence favours coherence with a single source. RAG-Token favours multi-source synthesis.</li>
+  <li>Long-term memory needs a strategy (long context, RAG or hierarchical memory) because attention is expensive.</li>
+</ul>
+
+<h2 id="refs">9. References</h2>
+<ol>
+  <li>Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. NeurIPS 2020.</li>
+  <li>Karpukhin, V., et al. (2020). Dense Passage Retrieval for Open-Domain Question Answering. EMNLP 2020.</li>
+  <li>Devlin, J., et al. (2019). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. NAACL 2019.</li>
+  <li>Lewis, M., et al. (2019). BART: Denoising Sequence-to-Sequence Pre-training. ACL 2020.</li>
+  <li>Packer, C., et al. (2024). MemGPT: Towards LLMs as Operating Systems. arXiv.</li>
+  <li>Vaswani, A., et al. (2017). Attention Is All You Need. NeurIPS 2017.</li>
+</ol>
+</main>
+</body>
+</html>
